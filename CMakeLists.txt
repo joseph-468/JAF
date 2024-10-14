@@ -3,6 +3,7 @@ project(JAF)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded")
 
 set(SDL2_DIR "${CMAKE_SOURCE_DIR}/vendor/SDL")
 
@@ -25,7 +26,5 @@ target_link_libraries(${PROJECT_NAME}
         setupapi
         cfgmgr32
 )
-
-set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded")
 
 add_subdirectory(examples)

@@ -10,5 +10,3 @@ foreach(EXAMPLE_SOURCE ${EXAMPLE_SOURCES})
     add_executable(${EXAMPLE} ${EXAMPLE_SOURCE})
     target_link_libraries(${EXAMPLE} JAF)
 endforeach()
-
-set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded")
