@@ -1,17 +1,12 @@
 #pragma once
 
+#include <SDL.h>
+
 namespace JAF {
     class App {
     public:
         virtual ~App() = default;
-        void run() {
-            init();
-            while (running) {
-                update();
-                render();
-            }
-            quit();
-        }
+        void run();
 
     protected:
         virtual void init() = 0;
@@ -20,5 +15,12 @@ namespace JAF {
         virtual void quit() = 0;
 
         bool running = false;
+
+    private:
+        void initJAF();
+        void quitJAF();
+
+        SDL_Window *window = nullptr;
+        SDL_Renderer *renderer = nullptr;
     };
 }

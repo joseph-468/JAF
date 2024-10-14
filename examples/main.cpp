@@ -9,10 +9,7 @@ protected:
         running = true;
     }
     void update() override {
-        std::cout << "Updating x: " << x << std::endl;
-        if (x++ == 10) {
-            running = false;
-        }
+        std::cout << "Updating" << std::endl;
     }
     void render() override {
         std::cout << "Rendering" << std::endl;
@@ -20,11 +17,10 @@ protected:
     void quit() override {
         std::cout << "Quitting" << std::endl;
     }
-
-    int x = 1;
 };
 
-int main() {
+int main(int argc, char *argv[]) {
     App app;
     app.run();
+    return 0;
 }
