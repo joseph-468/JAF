@@ -14,6 +14,9 @@ namespace JAF {
         virtual void render() = 0;
         virtual void quit() = 0;
 
+        void createWindow(int width, int height, const char *title);
+        void destroyWindow();
+
         bool running = false;
 
     private:

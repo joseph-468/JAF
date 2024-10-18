@@ -29,15 +29,28 @@ namespace JAF {
 
     void App::initJAF() {
         SDL_Init(SDL_INIT_EVERYTHING);
-        window = SDL_CreateWindow("JAF Application", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 600, 600, SDL_WINDOW_SHOWN);
-        renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+        running = true;
     }
 
     void App::quitJAF() {
-        SDL_DestroyRenderer(renderer);
-        SDL_DestroyWindow(window);
-        renderer = nullptr;
-        window = nullptr;
+        destroyWindow();
         SDL_Quit();
+    }
+
+    void App::createWindow(const int width, const int height, const char *const title) {
+        destroyWindow();
+        window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_SHOWN);
+        renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    }
+
+    void App::destroyWindow() {
+        if (renderer) {
+            SDL_DestroyRenderer(renderer);
+            renderer = nullptr;
+        }
+        if (window) {
+            SDL_DestroyWindow(window);
+            window = nullptr;
+        }
     }
 }
