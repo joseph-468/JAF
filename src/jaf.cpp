@@ -1,29 +1,64 @@
 #include "jaf.h"
 
 #include <SDL.h>
-#include <iostream>
 
 namespace JAF {
+    void Button::display(App *const app) {
+        app->drawRectangle(x, y, w, h, color);
+    }
+
+    void Button::handleEvent(App *const app, const SDL_Event &event) {
+        const SDL_Point mousePos = { app->getMouseX(), app->getMouseY() };
+        const SDL_Rect buttonRect = { x, y, w, h };
+        if (!SDL_PointInRect(&mousePos, &buttonRect)) return;
+
+        if (event.type == SDL_MOUSEBUTTONDOWN) {
+            pressed = true;
+        }
+        else if (event.type == SDL_MOUSEBUTTONUP) {
+            pressed = false;
+        }
+    }
+
+    App::App() :
+        running(false),
+        window(nullptr),
+        renderer(nullptr),
+        mouseX(-1),
+        mouseY(-1),
+        screenWidth(-1),
+        screenHeight(-1) {}
+
     void App::run() {
         initJAF();
-
         init();
+
         while (running) {
             SDL_Event event;
             while (SDL_PollEvent(&event)) {
                 if (event.type == SDL_QUIT) {
                     running = false;
                 }
+                else if (event.type == SDL_MOUSEMOTION) {
+                    mouseX = event.motion.x;
+                    mouseY = event.motion.y;
+                }
+                else {
+                    for (const auto &widget : widgets) {
+                        widget->handleEvent(this, event);
+                    }
+                }
             }
 
             update();
-            render();
 
+            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
             SDL_RenderClear(renderer);
+            renderWidgets();
             SDL_RenderPresent(renderer);
         }
-        quit();
 
+        quit();
         quitJAF();
     }
 
@@ -39,8 +74,13 @@ namespace JAF {
 
     void App::createWindow(const int width, const int height, const char *const title) {
         destroyWindow();
-        window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_SHOWN);
+
+        window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+            width, height, SDL_WINDOW_SHOWN);
         renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+
+        screenWidth = width;
+        screenHeight = height;
     }
 
     void App::destroyWindow() {
@@ -51,6 +91,32 @@ namespace JAF {
         if (window) {
             SDL_DestroyWindow(window);
             window = nullptr;
+            screenWidth = -1;
+            screenHeight = -1;
+        }
+    }
+
+    void App::drawRectangle(const int x, const int y, const int w, const int h, const Color color) const {
+        SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+        const SDL_Rect dst = { x, y, w, h };
+        SDL_RenderFillRect(renderer, &dst);
+    }
+
+    void App::renderWidgets() {
+        for (const auto &widget : widgets) {
+            widget->display(this);
+        }
+    }
+
+    void App::addWidget(Widget *const widget) {
+        widgets.push_back(widget);
+    }
+
+    void App::removeWidget(const Widget *const widget) {
+        for (int i = 0; i < widgets.size(); i++) {
+            if (widgets[i] == widget) {
+                widgets.erase(widgets.begin() + i);
+            }
         }
     }
 }
