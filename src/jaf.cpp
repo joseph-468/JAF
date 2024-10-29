@@ -54,7 +54,7 @@ namespace JAF {
 
             SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
             SDL_RenderClear(renderer);
-            renderWidgets();
+            render();
             SDL_RenderPresent(renderer);
         }
 
@@ -72,7 +72,7 @@ namespace JAF {
         SDL_Quit();
     }
 
-    void App::createWindow(const int width, const int height, const char *const title) {
+    void App::createWindow(const Sint32 width, const Sint32 height, const char *const title) {
         destroyWindow();
 
         window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
@@ -96,7 +96,7 @@ namespace JAF {
         }
     }
 
-    void App::drawRectangle(const int x, const int y, const int w, const int h, const Color color) const {
+    void App::drawRectangle(const Sint32 x, const Sint32 y, const Sint32 w, const Sint32 h, const Color color) const {
         SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
         const SDL_Rect dst = { x, y, w, h };
         SDL_RenderFillRect(renderer, &dst);
@@ -113,7 +113,7 @@ namespace JAF {
     }
 
     void App::removeWidget(const Widget *const widget) {
-        for (int i = 0; i < widgets.size(); i++) {
+        for (Sint32 i = 0; i < widgets.size(); i++) {
             if (widgets[i] == widget) {
                 widgets.erase(widgets.begin() + i);
             }

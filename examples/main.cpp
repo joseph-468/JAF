@@ -28,6 +28,10 @@ protected:
         }
     }
 
+    void render() override {
+        renderWidgets();
+    }
+
     void quit() override {}
 
     std::vector<JAF::Widget *> widgets;
