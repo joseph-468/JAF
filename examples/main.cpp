@@ -1,5 +1,7 @@
 #include "jaf.h"
 
+#include <cassert>
+
 constexpr auto SCREEN_WIDTH = 854;
 constexpr auto SCREEN_HEIGHT = 480;
 constexpr auto WINDOW_TITLE = "Example - Main";

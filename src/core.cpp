@@ -1,26 +1,10 @@
-#include "jaf.h"
+#include "core.h"
 
 #include <SDL.h>
 
 namespace JAF {
-    void Button::display(App *const app) {
-        app->drawRectangle(x, y, w, h, color);
-    }
-
-    void Button::handleEvent(App *const app, const SDL_Event &event) {
-        const SDL_Point mousePos = { app->getMouseX(), app->getMouseY() };
-        const SDL_Rect buttonRect = { x, y, w, h };
-        if (!SDL_PointInRect(&mousePos, &buttonRect)) return;
-
-        if (event.type == SDL_MOUSEBUTTONDOWN) {
-            pressed = true;
-        }
-        else if (event.type == SDL_MOUSEBUTTONUP) {
-            pressed = false;
-        }
-    }
-
     App::App() :
+        initializedJAF(false),
         running(false),
         window(nullptr),
         renderer(nullptr),
@@ -31,7 +15,10 @@ namespace JAF {
 
     void App::run() {
         initJAF();
-        init();
+        running = initializedJAF;
+        if (initializedJAF) {
+            init();
+        }
 
         while (running) {
             SDL_Event event;
@@ -52,19 +39,27 @@ namespace JAF {
 
             update();
 
+            JAF_ASSERT(renderer != nullptr);
             SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
             SDL_RenderClear(renderer);
             render();
+
+            JAF_ASSERT(renderer != nullptr);
             SDL_RenderPresent(renderer);
         }
 
-        quit();
+        if (initializedJAF) {
+            quit();
+        }
         quitJAF();
     }
 
     void App::initJAF() {
-        SDL_Init(SDL_INIT_EVERYTHING);
-        running = true;
+        initializedJAF = true;
+        const bool initializedSDL = SDL_Init(SDL_INIT_EVERYTHING) == 0;
+        if (!initializedSDL) {
+            initializedJAF = false;
+        }
     }
 
     void App::quitJAF() {
@@ -76,7 +71,7 @@ namespace JAF {
         destroyWindow();
 
         window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-            width, height, SDL_WINDOW_SHOWN);
+            width, height, SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN);
         renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
         screenWidth = width;
@@ -97,6 +92,7 @@ namespace JAF {
     }
 
     void App::drawRectangle(const Sint32 x, const Sint32 y, const Sint32 w, const Sint32 h, const Color color) const {
+        JAF_ASSERT(renderer != nullptr);
         SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
         const SDL_Rect dst = { x, y, w, h };
         SDL_RenderFillRect(renderer, &dst);
