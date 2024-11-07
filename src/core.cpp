@@ -105,6 +105,7 @@ namespace JAF {
     }
 
     void App::addWidget(Widget *const widget) {
+        widget->app = this;
         widgets.push_back(widget);
     }
 

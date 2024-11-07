@@ -10,13 +10,14 @@ class App final : public JAF::App {
 protected:
     void init() override {
         createWindow(SCREEN_WIDTH, SCREEN_HEIGHT, WINDOW_TITLE);
+
         auto const but = new JAF::Button();
+        addWidget(but);
         but->w = getScreenWidth() / 4;
         but->h = getScreenHeight() / 4;
         but->x = getScreenWidth() / 2 - but->w / 2;
         but->y = getScreenHeight() / 2 - but->h / 2;
         but->color = { 255, 0, 0, 255 };
-        addWidget(but);
         widgets.push_back(but);
     }
 

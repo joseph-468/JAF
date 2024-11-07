@@ -8,6 +8,7 @@ set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded")
 set(SDL2_DIR "${CMAKE_SOURCE_DIR}/vendor/SDL")
 
 include_directories(${PROJECT_NAME} "include")
+include_directories(${PROJECT_NAME} "vendor/stb")
 include_directories(${PROJECT_NAME} "${SDL2_DIR}/include")
 
 file(GLOB_RECURSE SOURCES "src/*.cpp")
