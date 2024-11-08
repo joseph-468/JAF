@@ -4,6 +4,7 @@
 #include "core.h"
 
 #include <SDL.h>
+#include <vector>
 
 namespace JAF {
     class App;
@@ -38,9 +39,11 @@ namespace JAF {
         void handleEvent(App *app, const SDL_Event &event) override;
 
         void addTexture(Sint32 textureWidth, Sint32 textureHeight);
+        void updateTexture(const std::vector<Uint32> &data) const;
 
         Sint32 x{}, y{};
         Sint32 w{}, h{};
+        Sint32 textureWidth{}, textureHeight{};
 
     private:
         SDL_Texture *texture{};

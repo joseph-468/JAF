@@ -70,8 +70,12 @@ namespace JAF {
     void App::createWindow(const Sint32 width, const Sint32 height, const char *const title) {
         destroyWindow();
 
-        window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-            width, height, SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN);
+        window = SDL_CreateWindow(
+            title,
+            SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+            width, height,
+            SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN
+        );
         renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
         screenWidth = width;
