@@ -11,7 +11,9 @@ namespace JAF {
         mouseX(-1),
         mouseY(-1),
         screenWidth(-1),
-        screenHeight(-1) {}
+        screenHeight(-1) {
+        initTime = SDL_GetPerformanceCounter();
+    }
 
     void App::run() {
         initJAF();
@@ -96,6 +98,10 @@ namespace JAF {
             screenWidth = -1;
             screenHeight = -1;
         }
+    }
+
+    double App::getCurrentTime() const {
+        return static_cast<double>(SDL_GetPerformanceCounter() - initTime) / static_cast<double>(SDL_GetPerformanceFrequency());
     }
 
     void App::drawRectangle(const Sint32 x, const Sint32 y, const Sint32 w, const Sint32 h, const Color color) const {
