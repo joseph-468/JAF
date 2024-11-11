@@ -1,6 +1,7 @@
 #include "jaf.h"
 
 #include <cassert>
+#include <iostream>
 
 constexpr auto SCREEN_WIDTH = 512;
 constexpr auto SCREEN_HEIGHT = 512;
@@ -14,8 +15,7 @@ protected:
 
         grid.resize(128 * 128);
 
-        canvas = new JAF::Canvas();
-        addWidget(canvas);
+        canvas = new JAF::Canvas(this);
         canvas->x = 0;
         canvas->y = 0;
         canvas->w = 512;
@@ -24,11 +24,8 @@ protected:
     }
 
     void update() override {
-        grid[x++] = color;
-        if (x == grid.size()) {
-            color ^= 0x000000FF;
-            x = 0;
-
+        if (canvas->pressed) {
+            grid[canvas->pressedX + canvas->pressedY * canvas->textureWidth] = 0xFF00FFFF;
         }
     }
 
@@ -39,7 +36,6 @@ protected:
 
     void quit() override {}
 
-    Sint32 x = 0;
     Uint32 color = 0xFF0000FF;
     std::vector<Uint32> grid;
     JAF::Canvas *canvas{};

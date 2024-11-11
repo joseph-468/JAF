@@ -5,13 +5,15 @@
 
 #include <SDL.h>
 #include <vector>
+#include <iostream>
 
 namespace JAF {
     class App;
 
     class Widget {
     public:
-        virtual ~Widget() = default;
+        explicit Widget(App *app);
+        virtual ~Widget();
         virtual void display(App *app) = 0;
         virtual void handleEvent(App *app, const SDL_Event &event) = 0;
 
@@ -20,7 +22,7 @@ namespace JAF {
 
     class Button final : public Widget {
     public:
-        Button() = default;
+        explicit Button(App *app) : Widget(app) {};
         ~Button() override = default;
         void display(App *app) override;
         void handleEvent(App *app, const SDL_Event &event) override;
@@ -33,7 +35,7 @@ namespace JAF {
 
     class Canvas final : public Widget {
     public:
-        Canvas() = default;
+        explicit Canvas(App *app) : Widget(app) {};
         ~Canvas() override = default;
         void display(App *app) override;
         void handleEvent(App *app, const SDL_Event &event) override;
@@ -44,6 +46,9 @@ namespace JAF {
         Sint32 x{}, y{};
         Sint32 w{}, h{};
         Sint32 textureWidth{}, textureHeight{};
+
+        bool pressed{};
+        Sint32 pressedX{}, pressedY{};
 
     private:
         SDL_Texture *texture{};

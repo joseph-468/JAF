@@ -11,8 +11,7 @@ protected:
     void init() override {
         createWindow(SCREEN_WIDTH, SCREEN_HEIGHT, WINDOW_TITLE);
 
-        auto const but = new JAF::Button();
-        addWidget(but);
+        auto const but = new JAF::Button(this);
         but->w = getScreenWidth() / 4;
         but->h = getScreenHeight() / 4;
         but->x = getScreenWidth() / 2 - but->w / 2;

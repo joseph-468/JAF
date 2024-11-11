@@ -16,6 +16,8 @@ namespace JAF {
 
     class App {
     public:
+        friend class Widget;
+
         App();
         virtual ~App() = default;
         void run();
@@ -28,9 +30,6 @@ namespace JAF {
         void createWindow(Sint32 width, Sint32 height, const char *title);
         void destroyWindow();
         void renderWidgets();
-        void addWidget(Widget *widget);
-        void removeWidget(const Widget *widget);
-
         void drawRectangle(Sint32 x, Sint32 y, Sint32 w, Sint32 h, Color color) const;
 
         [[nodiscard]] Sint32 getMouseX() const noexcept { return mouseX; }
@@ -45,6 +44,8 @@ namespace JAF {
     private:
         void initJAF();
         void quitJAF();
+        void addWidget(Widget *widget);
+        void removeWidget(const Widget *widget);
 
         bool initializedJAF;
         bool running;

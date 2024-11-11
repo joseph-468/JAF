@@ -4,6 +4,15 @@
 #include <iostream>
 
 namespace JAF {
+    Widget::Widget(App *app) {
+        this->app = app;
+        app->addWidget(this);
+    }
+
+    Widget::~Widget() {
+        app->removeWidget(this);
+    }
+
     void Button::display(App *const app) {
         app->drawRectangle(x, y, w, h, color);
     }
@@ -11,12 +20,15 @@ namespace JAF {
     void Button::handleEvent(App *const app, const SDL_Event &event) {
         const SDL_Point mousePos = { app->getMouseX(), app->getMouseY() };
         const SDL_Rect buttonRect = { x, y, w, h };
-        if (!SDL_PointInRect(&mousePos, &buttonRect)) return;
 
         if (event.type == SDL_MOUSEBUTTONDOWN) {
             pressed = true;
         }
         else if (event.type == SDL_MOUSEBUTTONUP) {
+            pressed = false;
+        }
+
+        if (!SDL_PointInRect(&mousePos, &buttonRect)) {
             pressed = false;
         }
     }
@@ -26,7 +38,23 @@ namespace JAF {
         SDL_RenderCopy(app->getRenderer(), texture, nullptr, &dst);
     }
 
-    void Canvas::handleEvent(App *const app, const SDL_Event &event) {}
+    void Canvas::handleEvent(App *const app, const SDL_Event &event) {
+        const SDL_Point mousePos = { app->getMouseX(), app->getMouseY() };
+        const SDL_Rect buttonRect = { x, y, w, h };
+        pressedX = static_cast<Sint32>(static_cast<float>(mousePos.x - x) / (static_cast<float>(w) / static_cast<float>(textureWidth)));
+        pressedY = static_cast<Sint32>(static_cast<float>(mousePos.y - y) / (static_cast<float>(h) / static_cast<float>(textureHeight)));
+
+        if (event.type == SDL_MOUSEBUTTONDOWN) {
+            pressed = true;
+        }
+        else if (event.type == SDL_MOUSEBUTTONUP) {
+            pressed = false;
+        }
+
+        if (!SDL_PointInRect(&mousePos, &buttonRect)) {
+            pressed = false;
+        }
+    }
 
     void Canvas::addTexture(const Sint32 textureWidth, const Sint32 textureHeight) {
         this->textureWidth = textureWidth;
