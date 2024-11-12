@@ -40,23 +40,20 @@ namespace JAF {
 
     void Canvas::handleEvent(App *const app, const SDL_Event &event) {
         const SDL_Point mousePos = { app->getMouseX(), app->getMouseY() };
-        const SDL_Rect buttonRect = { x, y, w, h };
+        const SDL_Rect canvasRect = { x, y, w, h };
         pressedX = static_cast<Sint32>(static_cast<float>(mousePos.x - x) / (static_cast<float>(w) / static_cast<float>(textureWidth)));
         pressedY = static_cast<Sint32>(static_cast<float>(mousePos.y - y) / (static_cast<float>(h) / static_cast<float>(textureHeight)));
 
-        if (event.type == SDL_MOUSEBUTTONDOWN) {
-            pressed = true;
-        }
-        else if (event.type == SDL_MOUSEBUTTONUP) {
-            pressed = false;
-        }
-
-        if (!SDL_PointInRect(&mousePos, &buttonRect)) {
-            pressed = false;
+        pressed = false;
+        if (SDL_PointInRect(&mousePos, &canvasRect)) {
+            pressed = app->isLeftMouseDown();
         }
     }
 
     void Canvas::addTexture(const Sint32 textureWidth, const Sint32 textureHeight) {
+        JAF_ASSERT(textureWidth > 0);
+        JAF_ASSERT(textureHeight > 0);
+
         this->textureWidth = textureWidth;
         this->textureHeight = textureHeight;
         texture = SDL_CreateTexture(
@@ -65,6 +62,8 @@ namespace JAF {
             SDL_TEXTUREACCESS_STREAMING,
             textureWidth, textureHeight
         );
+        JAF_ASSERT(texture != nullptr);
+
         SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
         void *pixels;
         Sint32 pitch;
@@ -73,7 +72,8 @@ namespace JAF {
         SDL_UnlockTexture(texture);
     }
 
-    void Canvas::updateTexture(const std::vector<Uint32> &data) const { JAF_ASSERT(texture != nullptr);
+    void Canvas::updateTexture(const std::vector<Uint32> &data) const {
+        JAF_ASSERT(texture != nullptr);
         JAF_ASSERT(data.size() == textureWidth * textureHeight);
 
         Uint32 *pixels;

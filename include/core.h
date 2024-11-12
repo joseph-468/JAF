@@ -32,13 +32,17 @@ namespace JAF {
         void renderWidgets();
         void drawRectangle(Sint32 x, Sint32 y, Sint32 w, Sint32 h, Color color) const;
 
-        [[nodiscard]] Sint32 getMouseX() const { return mouseX; }
-        [[nodiscard]] Sint32 getMouseY() const { return mouseY; }
+        [[nodiscard]] double getCurrentTime() const;
+        [[nodiscard]] Sint32 getMouseX() const;
+        [[nodiscard]] Sint32 getMouseY() const;
+        [[nodiscard]] Sint32 getWindowX() const { return windowX; }
+        [[nodiscard]] Sint32 getWindowY() const { return windowY; }
         [[nodiscard]] Sint32 getScreenWidth() const { return screenWidth; }
         [[nodiscard]] Sint32 getScreenHeight() const { return screenHeight; }
         [[nodiscard]] Sint32 getRunning() const { return running; }
         [[nodiscard]] SDL_Renderer *getRenderer() const { return renderer; }
-        [[nodiscard]] double getCurrentTime() const;
+        [[nodiscard]] bool isLeftMouseDown() const { return leftMouseDown; }
+        [[nodiscard]] bool isRightMouseDown() const { return rightMouseDown; }
 
         void setRunning(const bool value) { running = value; }
 
@@ -52,8 +56,12 @@ namespace JAF {
         bool running;
         SDL_Window *window;
         SDL_Renderer *renderer;
+        bool leftMouseDown;
+        bool rightMouseDown;
         Sint32 mouseX;
         Sint32 mouseY;
+        Sint32 windowX;
+        Sint32 windowY;
         Sint32 screenWidth;
         Sint32 screenHeight;
         std::vector<Widget *> widgets;

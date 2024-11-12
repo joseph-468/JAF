@@ -8,8 +8,12 @@ namespace JAF {
         running(false),
         window(nullptr),
         renderer(nullptr),
+        leftMouseDown(false),
+        rightMouseDown(false),
         mouseX(-1),
         mouseY(-1),
+        windowX(-1),
+        windowY(-1),
         screenWidth(-1),
         screenHeight(-1) {
         initTime = SDL_GetPerformanceCounter();
@@ -30,15 +34,25 @@ namespace JAF {
                         running = false;
                     } break;
 
-                    case SDL_MOUSEMOTION: {
-                        mouseX = event.motion.x;
-                        mouseY = event.motion.y;
-                    }
-                    default: {
-                        for (const auto &widget : widgets) {
-                            widget->handleEvent(this, event);
+                    case SDL_WINDOWEVENT: {
+                        if (event.window.event == SDL_WINDOWEVENT_MOVED) {
+                            windowX = event.window.data1;
+                            windowY = event.window.data2;
                         }
-                    }
+                    } break;
+
+                    case SDL_MOUSEBUTTONDOWN:
+                    case SDL_MOUSEBUTTONUP: {
+                        if (event.button.button == 1) {
+                            leftMouseDown = event.button.state;
+                        }
+                        else if (event.button.button == 3) {
+                            rightMouseDown = event.button.state;
+                        }
+                    } break;
+                }
+                for (const auto &widget : widgets) {
+                    widget->handleEvent(this, event);
                 }
             }
 
@@ -81,10 +95,14 @@ namespace JAF {
             width, height,
             SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN
         );
+        JAF_ASSERT(window != nullptr);
+
         renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+        JAF_ASSERT(renderer != nullptr);
 
         screenWidth = width;
         screenHeight = height;
+        SDL_GetWindowPosition(window, &windowX, &windowY);
     }
 
     void App::destroyWindow() {
@@ -102,6 +120,18 @@ namespace JAF {
 
     double App::getCurrentTime() const {
         return static_cast<double>(SDL_GetPerformanceCounter() - initTime) / static_cast<double>(SDL_GetPerformanceFrequency());
+    }
+
+    Sint32 App::getMouseX() const {
+        Sint32 mouseX;
+        SDL_GetGlobalMouseState(&mouseX, nullptr);
+        return mouseX - windowX;
+    }
+
+    Sint32 App::getMouseY() const {
+        Sint32 mouseY;
+        SDL_GetGlobalMouseState(nullptr, &mouseY);
+        return mouseY - windowY;
     }
 
     void App::drawRectangle(const Sint32 x, const Sint32 y, const Sint32 w, const Sint32 h, const Color color) const {
