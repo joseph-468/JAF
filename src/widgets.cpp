@@ -13,6 +13,10 @@ namespace JAF {
         app->removeWidget(this);
     }
 
+    void Button::update(App *app) {
+        pressed = false;
+    }
+
     void Button::display(App *const app) {
         app->drawRectangle(x, y, w, h, color);
     }
@@ -21,15 +25,17 @@ namespace JAF {
         const SDL_Point mousePos = { app->getMouseX(), app->getMouseY() };
         const SDL_Rect buttonRect = { x, y, w, h };
 
-        if (event.type == SDL_MOUSEBUTTONDOWN) {
+        if (SDL_PointInRect(&mousePos, &buttonRect) && app->isLeftMousePressed()) {
             pressed = true;
+            down = true;
         }
-        else if (event.type == SDL_MOUSEBUTTONUP) {
+        else if (app->isLeftMouseDown() && down) {
             pressed = false;
+            down = true;
         }
-
-        if (!SDL_PointInRect(&mousePos, &buttonRect)) {
+        else {
             pressed = false;
+            down = false;
         }
     }
 

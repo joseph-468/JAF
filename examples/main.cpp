@@ -22,7 +22,7 @@ protected:
 
     void update() override {
         const auto but = dynamic_cast<JAF::Button *>(widgets[0]);
-        if (but->pressed) {
+        if (but->isDown()) {
             but->color = { 0, 255, 0, 255 };
         }
         else {
@@ -36,6 +36,7 @@ protected:
 
     void quit() override {}
 
+    Uint64 ticks = 0;
     std::vector<JAF::Widget *> widgets;
 };
 

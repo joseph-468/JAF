@@ -10,6 +10,7 @@ constexpr auto WINDOW_TITLE = "Example - Falling Sand";
 
 enum class CellType {
     AIR,
+    WALL,
     SAND,
     WATER,
 };
@@ -17,11 +18,14 @@ enum class CellType {
 struct Cell {
     CellType type = CellType::AIR;
     JAF::Color color = { 0, 0, 0};
+
+    static const Cell EMPTY;
 };
+const Cell Cell::EMPTY = { CellType::AIR, { 0, 0, 0 }};
 
 class World {
 public:
-    explicit World(const Sint32 width, const Sint32 height) : width(width), height(height) {
+    explicit World(const Sint32 width, const Sint32 height, const CellType borderType) : width(width), height(height), borderType(borderType) {
         grid.clear();
         grid.resize(width * height);
 
@@ -44,12 +48,14 @@ public:
     Sint32 height{};
     std::vector<Cell> grid;
     std::vector<Uint32> texture;
+    CellType borderType;
 };
 
 class App final : public JAF::App {
 protected:
     void init() override {
         createWindow(SCREEN_WIDTH, SCREEN_HEIGHT, WINDOW_TITLE);
+        setUpdatesPerSecond(tickRate);
 
         canvas = new JAF::Canvas(this);
         canvas->x = 0;
@@ -57,29 +63,39 @@ protected:
         canvas->w = 512;
         canvas->h = 512;
         canvas->addTexture(world.width, world.height);
+
+        borderTypeButton = new JAF::Button(this);
+        borderTypeButton->color = { 255, 0, 0 };
+        borderTypeButton->x = 0;
+        borderTypeButton->y = 0;
+        borderTypeButton->w = 30;
+        borderTypeButton->h = 10;
     }
 
     void update() override {
-        const auto currentTicks = static_cast<Sint64>(getCurrentTime() / (1000.0f / static_cast<float>(tickRate) / 1000.0f));
-        if (currentTicks <= ticks) {
-            return;
+        if (borderTypeButton->isPressed()) {
+            world.borderType = (world.borderType == CellType::AIR) ? CellType::WALL : CellType::AIR;
         }
-        ticks = currentTicks;
 
+        for (Sint32 y = world.height - 1; y > -1; y--) {
+            for (Sint32 x = 0; x < world.width; x++) {
+                const Sint32 dst = x + y * world.width;
+                if (world.grid[dst].type == CellType::SAND) {
+                    if (y == world.height - 1) {
+                        if (world.borderType == CellType::AIR) {
+                            world.grid[dst] = Cell::EMPTY;
+                        }
+                    }
+                    if (world.grid[dst + world.width].type == CellType::AIR) {
+                        world.grid[dst + world.width] = world.grid[dst];
+                        world.grid[dst] = Cell::EMPTY;
+                    }
+                }
+            }
+        }
         if (canvas->pressed) {
             const Cell newCell = { CellType::SAND, { 203, 189, 147 } };
             world.setCell(canvas->pressedX, canvas->pressedY, newCell);
-        }
-
-        for (Sint32 y = world.height - 1; y > 0; y--) {
-            for (Sint32 x = 0; x < world.width; x++) {
-                const Sint32 dst = x + y * world.width;
-                if (world.grid[dst].type == CellType::AIR && world.grid[dst - world.width].type == CellType::SAND) {
-                    world.grid[dst] = world.grid[dst - world.width];
-                    world.grid[dst - world.width].type = CellType::AIR;
-                    world.grid[dst - world.width].color = { 0, 0, 0, 0 };
-                }
-            }
         }
     }
 
@@ -95,10 +111,10 @@ protected:
     static constexpr auto DEFAULT_WORLD_HEIGHT = 128;
     static constexpr auto DEFAULT_TICK_RATE = 64;
 
-
     Sint64 ticks{};
     Sint32 tickRate = DEFAULT_TICK_RATE;
-    World world{ DEFAULT_WORLD_WIDTH, DEFAULT_WORLD_HEIGHT };
+    World world{ DEFAULT_WORLD_WIDTH, DEFAULT_WORLD_HEIGHT, CellType::AIR };
+    JAF::Button *borderTypeButton{};
     JAF::Canvas *canvas{};
 };
 

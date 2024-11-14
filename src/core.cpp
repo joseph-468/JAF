@@ -8,8 +8,12 @@ namespace JAF {
         running(false),
         window(nullptr),
         renderer(nullptr),
+        leftMousePressed(false),
+        rightMousePressed(false),
         leftMouseDown(false),
         rightMouseDown(false),
+        updatesPerSecond(-1),
+        previousTickTime(-1),
         mouseX(-1),
         mouseY(-1),
         windowX(-1),
@@ -27,6 +31,24 @@ namespace JAF {
         }
 
         while (running) {
+            if (const double currentTickTime = getCurrentTime();
+                currentTickTime - previousTickTime >= updatesPerSecond) {
+                previousTickTime = currentTickTime;
+            }
+            else {
+                continue;
+            }
+
+            leftMousePressed = false;
+            rightMousePressed = false;
+
+            for (const auto &widget : widgets) {
+                widget->update(this);
+            }
+
+            // TODO
+            // With low update rates events aren't polled frequently enough to be caught.
+            // Should implement a way to poll for events and then process them the next update.
             SDL_Event event;
             while (SDL_PollEvent(&event)) {
                 switch (event.type) {
@@ -44,9 +66,16 @@ namespace JAF {
                     case SDL_MOUSEBUTTONDOWN:
                     case SDL_MOUSEBUTTONUP: {
                         if (event.button.button == 1) {
+                            if (event.button.state == SDL_PRESSED && !leftMouseDown) {
+                                leftMousePressed = true;
+                            }
                             leftMouseDown = event.button.state;
                         }
                         else if (event.button.button == 3) {
+                            rightMousePressed = false;
+                            if (event.button.state == SDL_PRESSED && !rightMouseDown) {
+                                rightMousePressed = true;
+                            }
                             rightMouseDown = event.button.state;
                         }
                     } break;
@@ -132,6 +161,14 @@ namespace JAF {
         Sint32 mouseY;
         SDL_GetGlobalMouseState(nullptr, &mouseY);
         return mouseY - windowY;
+    }
+
+    void App::setUpdatesPerSecond(const double value) {
+        updatesPerSecond = 1000 / value / 1000;
+    }
+
+    void App::setRunning(const bool value) {
+        running = value;
     }
 
     void App::drawRectangle(const Sint32 x, const Sint32 y, const Sint32 w, const Sint32 h, const Color color) const {

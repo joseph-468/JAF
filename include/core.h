@@ -43,8 +43,11 @@ namespace JAF {
         [[nodiscard]] SDL_Renderer *getRenderer() const { return renderer; }
         [[nodiscard]] bool isLeftMouseDown() const { return leftMouseDown; }
         [[nodiscard]] bool isRightMouseDown() const { return rightMouseDown; }
+        [[nodiscard]] bool isLeftMousePressed() const { return leftMousePressed; }
+        [[nodiscard]] bool isRightMousePressed() const { return rightMousePressed; }
 
-        void setRunning(const bool value) { running = value; }
+        void setUpdatesPerSecond(double value);
+        void setRunning(bool value);
 
     private:
         void initJAF();
@@ -56,15 +59,19 @@ namespace JAF {
         bool running;
         SDL_Window *window;
         SDL_Renderer *renderer;
+        bool leftMousePressed;
+        bool rightMousePressed;
         bool leftMouseDown;
         bool rightMouseDown;
+        double updatesPerSecond;
+        double previousTickTime;
         Sint32 mouseX;
         Sint32 mouseY;
         Sint32 windowX;
         Sint32 windowY;
         Sint32 screenWidth;
         Sint32 screenHeight;
-        std::vector<Widget *> widgets;
         Uint64 initTime;
+        std::vector<Widget *> widgets;
     };
 }
