@@ -5,10 +5,52 @@
 
 #include <SDL.h>
 #include <vector>
-#include <iostream>
 
 namespace JAF {
     class App;
+    class Widget;
+
+    struct Event {
+        Event() = default;
+        virtual ~Event() = default;
+        explicit Event(Uint8 type);
+
+        bool unseen{};
+        const void *origin{};
+        Uint8 type{};
+    };
+
+    struct AppEvent final : Event {
+        AppEvent() = default;
+        explicit AppEvent(const Uint8 type) : Event(type) {}
+
+        enum {
+            SDL_EVENT,
+        };
+        SDL_Event event{};
+    };
+
+    struct ButtonEvent final : Event {
+        ButtonEvent() = default;
+        explicit ButtonEvent(const Uint8 type) : Event(type) {}
+
+        enum {
+            PRESSED,
+            RELEASED,
+        };
+    };
+
+    struct CanvasEvent final : Event {
+        CanvasEvent() = default;
+        explicit CanvasEvent(const Uint8 type) : Event(type) {}
+
+        enum {
+            PRESSED,
+            RELEASED,
+            MOTION,
+        };
+        Sint32 pressedX{}, pressedY{};
+    };
 
     class Widget {
     public:
@@ -20,6 +62,8 @@ namespace JAF {
         virtual void display(App *app) = 0;
         // Called after the update method for each event since the last update.
         virtual void handleEvent(App *app, const SDL_Event &event) = 0;
+
+        void addEvent(Event *event) const;
 
         App *app{};
     };
@@ -35,6 +79,8 @@ namespace JAF {
         [[nodiscard]] bool isPressed() const { return pressed; };
         [[nodiscard]] bool isDown() const { return down; }
 
+        static constexpr Uint8 PRESSED = 1;
+        static constexpr Uint8 RELEASED = 2;
         Sint32 x{}, y{};
         Sint32 w{}, h{};
         Color color{};
@@ -59,10 +105,8 @@ namespace JAF {
         Sint32 w{}, h{};
         Sint32 textureWidth{}, textureHeight{};
 
-        bool pressed{};
-        Sint32 pressedX{}, pressedY{};
-
     private:
         SDL_Texture *texture{};
+        bool down{};
     };
 }

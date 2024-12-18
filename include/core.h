@@ -5,6 +5,7 @@
 
 #include <SDL.h>
 #include <vector>
+#include <array>
 #include <cassert>
 
 #define JAF_ASSERT(expression) { \
@@ -13,6 +14,7 @@
 
 namespace JAF {
     class Widget;
+    struct Event;
 
     class App {
     public:
@@ -32,9 +34,11 @@ namespace JAF {
         void renderWidgets();
         void drawRectangle(Sint32 x, Sint32 y, Sint32 w, Sint32 h, Color color) const;
 
+        [[nodiscard]] Event *getEvent(const void *widget = nullptr) const;
         [[nodiscard]] double getCurrentTime() const;
         [[nodiscard]] Sint32 getMouseX() const;
         [[nodiscard]] Sint32 getMouseY() const;
+        [[nodiscard]] double getDeltaTime() const { return deltaTime; }
         [[nodiscard]] Sint32 getWindowX() const { return windowX; }
         [[nodiscard]] Sint32 getWindowY() const { return windowY; }
         [[nodiscard]] Sint32 getScreenWidth() const { return screenWidth; }
@@ -54,7 +58,9 @@ namespace JAF {
         void quitJAF();
         void addWidget(Widget *widget);
         void removeWidget(const Widget *widget);
+        void handleEvents();
 
+        static constexpr Uint64 MAX_WIDGET_EVENTS = 1024;
         bool initializedJAF;
         bool running;
         SDL_Window *window;
@@ -65,6 +71,7 @@ namespace JAF {
         bool rightMouseDown;
         double updatesPerSecond;
         double previousTickTime;
+        double deltaTime;
         Sint32 mouseX;
         Sint32 mouseY;
         Sint32 windowX;
@@ -72,6 +79,8 @@ namespace JAF {
         Sint32 screenWidth;
         Sint32 screenHeight;
         Uint64 initTime;
+        Uint64 eventQueuePos;
+        std::vector<Event *> eventQueue;
         std::vector<Widget *> widgets;
     };
 }

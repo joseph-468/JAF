@@ -1,6 +1,7 @@
 #include "core.h"
 
 #include <SDL.h>
+#include <iostream>
 
 namespace JAF {
     App::App() :
@@ -13,14 +14,17 @@ namespace JAF {
         leftMouseDown(false),
         rightMouseDown(false),
         updatesPerSecond(-1),
-        previousTickTime(-1),
+        previousTickTime(0),
+        deltaTime(-1),
         mouseX(-1),
         mouseY(-1),
         windowX(-1),
         windowY(-1),
         screenWidth(-1),
-        screenHeight(-1) {
+        screenHeight(-1),
+        eventQueuePos(0) {
         initTime = SDL_GetPerformanceCounter();
+        eventQueue.resize(MAX_WIDGET_EVENTS);
     }
 
     void App::run() {
@@ -31,61 +35,25 @@ namespace JAF {
         }
 
         while (running) {
-            if (const double currentTickTime = getCurrentTime();
-                currentTickTime - previousTickTime >= updatesPerSecond) {
-                previousTickTime = currentTickTime;
-            }
-            else {
-                continue;
-            }
-
-            leftMousePressed = false;
-            rightMousePressed = false;
-
             for (const auto &widget : widgets) {
                 widget->update(this);
             }
 
-            // TODO
-            // With low update rates events aren't polled frequently enough to be caught.
-            // Should implement a way to poll for events and then process them the next update.
-            SDL_Event event;
-            while (SDL_PollEvent(&event)) {
-                switch (event.type) {
-                    case SDL_QUIT: {
-                        running = false;
-                    } break;
+            handleEvents();
 
-                    case SDL_WINDOWEVENT: {
-                        if (event.window.event == SDL_WINDOWEVENT_MOVED) {
-                            windowX = event.window.data1;
-                            windowY = event.window.data2;
-                        }
-                    } break;
+            if (const double currentTickTime = getCurrentTime();
+                currentTickTime - previousTickTime >= updatesPerSecond) {
+                deltaTime = currentTickTime - previousTickTime;
+                previousTickTime = currentTickTime;
 
-                    case SDL_MOUSEBUTTONDOWN:
-                    case SDL_MOUSEBUTTONUP: {
-                        if (event.button.button == 1) {
-                            if (event.button.state == SDL_PRESSED && !leftMouseDown) {
-                                leftMousePressed = true;
-                            }
-                            leftMouseDown = event.button.state;
-                        }
-                        else if (event.button.button == 3) {
-                            rightMousePressed = false;
-                            if (event.button.state == SDL_PRESSED && !rightMouseDown) {
-                                rightMousePressed = true;
-                            }
-                            rightMouseDown = event.button.state;
-                        }
-                    } break;
-                }
-                for (const auto &widget : widgets) {
-                    widget->handleEvent(this, event);
+                update();
+
+                eventQueuePos = 0;
+                for (auto &event : eventQueue) {
+                    delete event;
+                    event = nullptr;
                 }
             }
-
-            update();
 
             JAF_ASSERT(renderer != nullptr);
             SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
@@ -100,6 +68,80 @@ namespace JAF {
             quit();
         }
         quitJAF();
+    }
+
+    void App::handleEvents() {
+        leftMousePressed = false;
+        rightMousePressed = false;
+
+        SDL_Event event;
+        while (SDL_PollEvent(&event)) {
+            const auto appEvent = new AppEvent(AppEvent::SDL_EVENT);
+            appEvent->event = event;
+            appEvent->origin = this;
+            appEvent->unseen = true;
+            if (eventQueuePos < MAX_WIDGET_EVENTS) {
+                eventQueue[eventQueuePos++] = appEvent;
+            }
+
+            switch (event.type) {
+                case SDL_QUIT: {
+                    running = false;
+                } break;
+
+                case SDL_WINDOWEVENT: {
+                    if (event.window.event == SDL_WINDOWEVENT_MOVED) {
+                        windowX = event.window.data1;
+                        windowY = event.window.data2;
+                    }
+                } break;
+
+                case SDL_MOUSEBUTTONDOWN:
+                case SDL_MOUSEBUTTONUP: {
+                    if (event.button.button == 1) {
+                        if (event.button.state == SDL_PRESSED && !leftMouseDown) {
+                            leftMousePressed = true;
+                        }
+                        leftMouseDown = event.button.state;
+                    }
+                    else if (event.button.button == 3) {
+                        rightMousePressed = false;
+                        if (event.button.state == SDL_PRESSED && !rightMouseDown) {
+                            rightMousePressed = true;
+                        }
+                        rightMouseDown = event.button.state;
+                    }
+                } break;
+            }
+
+            for (const auto &widget : widgets) {
+                widget->handleEvent(this, event);
+            }
+        }
+    }
+
+
+    Event *App::getEvent(const void *const widget) const {
+        Event *event;
+        if (widget) {
+            for (size_t i = 0; i < MAX_WIDGET_EVENTS; i++) {
+                if (eventQueue[i] && eventQueue[i]->unseen && eventQueue[i]->origin == widget) {
+                    event = eventQueue[i];
+                    event->unseen = false;
+                    return event;
+                }
+            }
+        }
+        else {
+            for (size_t i = 0; i < MAX_WIDGET_EVENTS; i++) {
+                if (eventQueue[i] && eventQueue[i]->unseen) {
+                    event = eventQueue[i];
+                    event->unseen = false;
+                    return event;
+                }
+            }
+        }
+        return nullptr;
     }
 
     void App::initJAF() {
@@ -164,7 +206,15 @@ namespace JAF {
     }
 
     void App::setUpdatesPerSecond(const double value) {
-        updatesPerSecond = 1000 / value / 1000;
+        if (value == 0) {
+            updatesPerSecond = std::numeric_limits<double>::infinity();
+        }
+        else if (value > 0) {
+            updatesPerSecond = 1000 / value / 1000;
+        }
+        else {
+            updatesPerSecond = 0;
+        }
     }
 
     void App::setRunning(const bool value) {
