@@ -1,7 +1,8 @@
 #include "jaf.h"
 
+#include <spdlog/spdlog.h>
+
 #include <cassert>
-#include <iostream>
 #include <random>
 
 constexpr auto SCREEN_WIDTH = 512;
@@ -141,6 +142,7 @@ protected:
                 }
                 if (tickRate < 1) tickRate = 1;
                 setUpdatesPerSecond(tickRate);
+                spdlog::info("Tick Rate: {}", tickRate);
             }
             if (event->event.type == SDL_KEYDOWN) {
                 if (event->event.key.keysym.scancode == SDL_SCANCODE_1) {
