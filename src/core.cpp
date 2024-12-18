@@ -9,6 +9,7 @@ namespace JAF {
         running(false),
         window(nullptr),
         renderer(nullptr),
+        logLevel(spdlog::level::off),
         leftMousePressed(false),
         rightMousePressed(false),
         leftMouseDown(false),
@@ -145,6 +146,7 @@ namespace JAF {
     }
 
     void App::initJAF() {
+        spdlog::set_level(JAF_DEFAULT_LOG_LEVEL);
         initializedJAF = true;
         const bool initializedSDL = SDL_Init(SDL_INIT_EVERYTHING) == 0;
         if (!initializedSDL) {
@@ -219,6 +221,10 @@ namespace JAF {
 
     void App::setRunning(const bool value) {
         running = value;
+    }
+
+    void setLogLevel(const spdlog::level::level_enum level) {
+        spdlog::set_level(level);
     }
 
     void App::drawRectangle(const Sint32 x, const Sint32 y, const Sint32 w, const Sint32 h, const Color color) const {

@@ -4,13 +4,19 @@
 #include "widgets.h"
 
 #include <SDL.h>
+#include <spdlog/spdlog.h>
 #include <vector>
-#include <array>
 #include <cassert>
 
 #define JAF_ASSERT(expression) { \
     assert(expression); \
 }
+
+#if NDEBUG == true
+    #define JAF_DEFAULT_LOG_LEVEL spdlog::level::off
+#else
+    #define JAF_DEFAULT_LOG_LEVEL spdlog::level::trace
+#endif
 
 namespace JAF {
     class Widget;
@@ -52,6 +58,7 @@ namespace JAF {
 
         void setUpdatesPerSecond(double value);
         void setRunning(bool value);
+        void setLogLevel(spdlog::level::level_enum level);
 
     private:
         void initJAF();
@@ -65,6 +72,7 @@ namespace JAF {
         bool running;
         SDL_Window *window;
         SDL_Renderer *renderer;
+        spdlog::level::level_enum logLevel;
         bool leftMousePressed;
         bool rightMousePressed;
         bool leftMouseDown;

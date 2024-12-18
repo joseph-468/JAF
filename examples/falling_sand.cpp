@@ -1,7 +1,5 @@
 #include "jaf.h"
 
-#include <spdlog/spdlog.h>
-
 #include <cassert>
 #include <random>
 
