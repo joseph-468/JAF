@@ -6,32 +6,27 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /utf-8")
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded")
 
-set(SDL2_DIR "${CMAKE_SOURCE_DIR}/vendor/SDL")
+set(RAYLIB_DIR "${CMAKE_SOURCE_DIR}/vendor/raylib")
+set(SDL2_DIR "${CMAKE_SOURCE_DIR}/vendor/SDL2")
 set(SPDLOG_DIR "${CMAKE_SOURCE_DIR}/vendor/spdlog")
-
-include_directories(${PROJECT_NAME} "include")
-include_directories(${PROJECT_NAME} "${SDL2_DIR}/include")
-include_directories(${PROJECT_NAME} "${SPDLOG_DIR}/include")
-include_directories(${PROJECT_NAME} "vendor/stb")
-include_directories(${PROJECT_NAME} "vendor/miniaudio")
 
 file(GLOB_RECURSE SOURCES "src/*.cpp")
 
 add_library(${PROJECT_NAME} STATIC ${SOURCES})
 
-find_library(SDL2_LIBRARY SDL2-static PATHS "${SDL2_DIR}/lib")
-find_library(SDL2_MAIN_LIBRARY SDL2main PATHS "${SDL2_DIR}/lib")
-find_library(SPDLOG_LIBRARY spdlog PATHS "${SPDLOG_DIR}/lib")
+find_library(RAYLIB raylib PATHS "${RAYLIB_DIR}/lib" REQUIRED)
+find_library(SDL2 sdl2 PATHS "${SDL2_DIR}/lib/x64" REQUIRED)
+find_library(SPDLOG spdlog PATHS "${SPDLOG_DIR}/lib" REQUIRED)
 
-target_link_libraries(${PROJECT_NAME}
-        ${SDL2_LIBRARY}
-        ${SDL2_MAIN_LIBRARY}
-        ${SPDLOG_LIBRARY}
-        winmm
-        imm32
-        version
-        setupapi
-        cfgmgr32
+target_include_directories(${PROJECT_NAME} PRIVATE
+        "include"
+        "${RAYLIB_DIR}/include"
+        "${SDL2_DIR}/include"
+        "${SPDLOG_DIR}/include"
 )
 
-add_subdirectory(examples)
+target_link_libraries(${PROJECT_NAME}
+        ${RAYLIB}
+        ${SDL2}
+        ${SPDLOG}
+)
